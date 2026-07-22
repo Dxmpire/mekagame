@@ -150,7 +150,8 @@ class UIRenderer {
 		this.app.innerHTML = `
 			<div class="main-menu">
 				<h1>MekaGame</h1>
-				<button onclick="game.startGame()">Start Game</button>
+				<button onclick="game.startGame()">Inventory / Mech Builder</button>
+				<button onclick="game.goToShop()">Shop</button>
 			</div>
 		`;
 	}
@@ -240,7 +241,7 @@ class UIRenderer {
 	}
 
 	renderFilterTabs() {
-		const tabs = ["all", "heads", "torsos", "legs", "cores", "weapons"];
+		const tabs = ["all", "heads", "torsos", "legs", "cores", "weapons", "lootboxes"];
 		return tabs.map(tab => {
 			const active = this.gameState.currentFilter === tab ? "active" : "";
 			return `<button class="tab-btn ${active}" onclick="game.filterInventory('${tab}')">${tab.charAt(0).toUpperCase() + tab.slice(1)}</button>`;
@@ -255,16 +256,17 @@ class UIRenderer {
 		if (filter === "legs") return inventory.filter(i => i.type === "legs");
 		if (filter === "cores") return inventory.filter(i => i.type === "core");
 		if (filter === "weapons") return inventory.filter(i => i.type === "weapon");
+		if (filter === "lootboxes") return [];
 		return inventory;
 	}
 
 	renderInventoryGrid(filtered) {
 		return filtered.map(item => `
 			<div class="inventory-item rarity-${item.rarity}" oncontextmenu="game.showContextMenu(event, '${item.id}')">
-				<div style="font-size: 32px;">${item.icon}</div>
+				<div style="font-size: 28px; line-height: 1;">${item.icon}</div>
 				<div class="item-name">${item.name}</div>
 				<div class="item-type">${item.type}</div>
-				<div class="item-rarity">${item.rarity} x${item.count}</div>
+				<div class="item-rarity">x${item.count}</div>
 			</div>
 		`).join("");
 	}
