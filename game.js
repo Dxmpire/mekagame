@@ -175,29 +175,41 @@ class UIRenderer {
 
 				<div style="display: flex; gap: 15px; padding: 15px; flex: 1; overflow: hidden;">
 					<!-- Left: Mech Stats & Equipped -->
-					<div style="width: 250px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
+					<div style="width: 200px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; font-size: 12px;">
 						<div class="stats-section">
-							<h3>Mech Stats</h3>
-							<div class="stat-row">
-								<span>Armor:</span>
-								<span class="stat-value">${this.calculateTotalArmor()}</span>
-							</div>
-							<div class="stat-row">
+							<h3 style="margin: 0 0 8px 0; font-size: 14px;">Mech Stats</h3>
+							<div class="stat-row" style="font-size: 11px;">
 								<span>Speed:</span>
 								<span class="stat-value">${this.calculateTotalSpeed()}</span>
 							</div>
-							<div class="stat-row">
+							<div class="stat-row" style="font-size: 11px;">
+								<span>Size:</span>
+								<span class="stat-value">${this.calculateTotalSize()}</span>
+							</div>
+							<div class="stat-row" style="font-size: 11px;">
 								<span>Weight:</span>
 								<span class="stat-value">${this.calculateTotalWeight()}</span>
 							</div>
-							<div class="stat-row">
-								<span>Power:</span>
-								<span class="stat-value">${this.calculateTotalPower()}</span>
+							<div class="stat-row" style="font-size: 11px;">
+								<span>Defense:</span>
+								<span class="stat-value">${this.calculateTotalArmor()}</span>
+							</div>
+							<div class="stat-row" style="font-size: 11px;">
+								<span>Attack:</span>
+								<span class="stat-value">${this.calculateTotalAttack()}</span>
+							</div>
+							<div class="stat-row" style="font-size: 11px;">
+								<span>Adv. Def:</span>
+								<span class="stat-value">${this.calculateTotalAdvDefense()}</span>
+							</div>
+							<div class="stat-row" style="font-size: 11px;">
+								<span>Moves:</span>
+								<span class="stat-value">${this.calculateTotalMoves()}</span>
 							</div>
 						</div>
 
-						<div class="stats-section">
-							<h3>Equipped</h3>
+						<div class="stats-section" style="font-size: 11px;">
+							<h3 style="margin: 0 0 8px 0; font-size: 12px;">Equipped</h3>
 							${this.renderSlot("Head", "head", equipped.head)}
 							${this.renderSlot("Torso", "torso", equipped.torso)}
 							${this.renderSlot("Legs", "legs", equipped.legs)}
@@ -388,10 +400,10 @@ class UIRenderer {
 	calculateTotalArmor() {
 		let total = 0;
 		const equipped = this.gameState.equipped;
-		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.armor || 0;
-		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.armor || 0;
-		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.armor || 0;
-		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.armor || 0;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.defense || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.defense || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.defense || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.defense || 0;
 		return total;
 	}
 
@@ -415,14 +427,44 @@ class UIRenderer {
 		return total;
 	}
 
-	calculateTotalPower() {
+	calculateTotalAttack() {
 		let total = 0;
 		const equipped = this.gameState.equipped;
-		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.power || 0;
-		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.power || 0;
-		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.power || 0;
-		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.power || 0;
-		return total.toFixed(1);
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.attack || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.attack || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.attack || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.attack || 0;
+		return total;
+	}
+
+	calculateTotalAdvDefense() {
+		let total = 0;
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.adv_defense || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.adv_defense || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.adv_defense || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.adv_defense || 0;
+		return total;
+	}
+
+	calculateTotalSize() {
+		let total = 0;
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.size || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.size || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.size || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.size || 0;
+		return total;
+	}
+
+	calculateTotalMoves() {
+		let moves = [];
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.moves) moves = moves.concat(equipped.head.moves);
+		if (equipped.torso && equipped.torso.moves) moves = moves.concat(equipped.torso.moves);
+		if (equipped.legs && equipped.legs.moves) moves = moves.concat(equipped.legs.moves);
+		if (equipped.core && equipped.core.moves) moves = moves.concat(equipped.core.moves);
+		return moves.length;
 	}
 }
 
