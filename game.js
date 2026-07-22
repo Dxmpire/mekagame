@@ -150,10 +150,17 @@ class UIRenderer {
 		this.app.innerHTML = `
 			<div class="main-menu">
 				<h1>MekaGame</h1>
-				<button onclick="game.startGame()">Inventory / Mech Builder</button>
-				<button onclick="game.goToShop()">Shop</button>
+				<button class="main-menu-btn" type="button">Inventory / Mech Builder</button>
+				<button class="main-menu-btn" type="button">Shop</button>
 			</div>
 		`;
+		
+		// Attach event listeners after rendering
+		const buttons = document.querySelectorAll(".main-menu-btn");
+		if (buttons.length >= 2) {
+			buttons[0].addEventListener("click", () => game.startGame());
+			buttons[1].addEventListener("click", () => game.goToShop());
+		}
 	}
 
 	renderMechInventory() {
