@@ -665,6 +665,10 @@ class Game {
 
 // Start game
 let game;
-document.addEventListener("DOMContentLoaded", () => {
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", () => {
+		game = new Game();
+	});
+} else {
 	game = new Game();
-});
+}
