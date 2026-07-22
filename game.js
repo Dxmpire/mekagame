@@ -101,15 +101,14 @@ class GameState {
 	refreshShop() {
 		const allParts = getAllParts();
 		this.shopParts = [];
-		const attempts = [];
+		let attempts = 0;
 		
-		while (this.shopParts.length < 5) {
+		while (this.shopParts.length < 5 && attempts < 50) {
 			let part = allParts[Math.floor(Math.random() * allParts.length)];
 			if (!this.shopParts.find(p => p.id === part.id)) {
 				this.shopParts.push(part);
 			}
 			attempts++;
-			if (attempts > 50) break;
 		}
 	}
 
@@ -664,11 +663,17 @@ class Game {
 }
 
 // Start game
+// Auto-push enabled - changes deploy automatically to GitHub Pages
 let game;
+console.log("Game script loaded, document state:", document.readyState);
+
 if (document.readyState === "loading") {
+	console.log("Document still loading, waiting for DOMContentLoaded");
 	document.addEventListener("DOMContentLoaded", () => {
+		console.log("DOMContentLoaded fired, initializing game");
 		game = new Game();
 	});
 } else {
+	console.log("Document ready, initializing game immediately");
 	game = new Game();
 }
