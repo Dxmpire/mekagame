@@ -173,30 +173,31 @@ class UIRenderer {
 					<div class="money-display">Scraps: ${this.gameState.money}</div>
 				</div>
 
-				<div class="content">
-					<div class="left-panel">
+				<div style="display: flex; gap: 15px; padding: 15px; flex: 1; overflow: hidden;">
+					<!-- Left: Mech Stats & Equipped -->
+					<div style="width: 250px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;">
 						<div class="stats-section">
 							<h3>Mech Stats</h3>
 							<div class="stat-row">
-								<span>Total Armor:</span>
+								<span>Armor:</span>
 								<span class="stat-value">${this.calculateTotalArmor()}</span>
 							</div>
 							<div class="stat-row">
-								<span>Total Speed:</span>
+								<span>Speed:</span>
 								<span class="stat-value">${this.calculateTotalSpeed()}</span>
 							</div>
 							<div class="stat-row">
-								<span>Total Weight:</span>
+								<span>Weight:</span>
 								<span class="stat-value">${this.calculateTotalWeight()}</span>
 							</div>
 							<div class="stat-row">
-								<span>Power Output:</span>
+								<span>Power:</span>
 								<span class="stat-value">${this.calculateTotalPower()}</span>
 							</div>
 						</div>
 
 						<div class="stats-section">
-							<h3>Equipped Parts</h3>
+							<h3>Equipped</h3>
 							${this.renderSlot("Head", "head", equipped.head)}
 							${this.renderSlot("Torso", "torso", equipped.torso)}
 							${this.renderSlot("Legs", "legs", equipped.legs)}
@@ -204,11 +205,12 @@ class UIRenderer {
 						</div>
 					</div>
 
-					<div class="right-panel" style="flex: 1;">
-						<div class="filter-tabs">
+					<!-- Right: Inventory Grid -->
+					<div style="flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden;">
+						<div class="filter-tabs" style="flex-wrap: wrap;">
 							${this.renderFilterTabs()}
 						</div>
-						<div class="inventory-grid">
+						<div class="inventory-grid" style="flex: 1; overflow-y: auto;">
 							${this.renderInventoryGrid(filtered)}
 						</div>
 					</div>
@@ -260,11 +262,11 @@ class UIRenderer {
 	}
 
 	renderInventoryGrid(filtered) {
-		return filtered.map(item => {
+		let items = filtered.map(item => {
 			const salvageValue = Math.floor(calculatePrice(item) * 0.5);
 			return `
-				<div class="inventory-item rarity-${item.rarity}" oncontextmenu="game.showContextMenu(event, '${item.id}')" title="Click to equip or right-click for options. Salvage: ${salvageValue} scraps">
-					<div style="font-size: 24px; line-height: 1; margin-bottom: 2px;">${item.icon}</div>
+				<div class="inventory-item rarity-${item.rarity}" oncontextmenu="game.showContextMenu(event, '${item.id}')" title="Right-click for options. Salvage: ${salvageValue} scraps">
+					<div style="font-size: 20px;">${item.icon}</div>
 					<div class="item-name">${item.name}</div>
 					<div class="item-type">${item.type}</div>
 					<div class="item-count">x${item.count}</div>
@@ -272,6 +274,20 @@ class UIRenderer {
 				</div>
 			`;
 		}).join("");
+
+		// Add lootboxes if in lootboxes tab or all
+		if (this.gameState.currentFilter === "lootboxes" || this.gameState.currentFilter === "all") {
+			items += this.gameState.lootboxes.map((box, idx) => `
+				<div class="inventory-item rarity-uncommon" oncontextmenu="game.showLootboxMenu(event, ${idx})" title="Right-click to open or delete">
+					<div style="font-size: 20px;">${box.icon}</div>
+					<div class="item-name">${box.name}</div>
+					<div class="item-type">lootbox</div>
+					<div class="item-count">x1</div>
+				</div>
+			`).join("");
+		}
+
+		return items;
 	}
 
 	renderShop() {
@@ -371,45 +387,41 @@ class UIRenderer {
 
 	calculateTotalArmor() {
 		let total = 0;
-		for (const slot in this.gameState.equipped) {
-			const part = this.gameState.equipped[slot];
-			if (part && part.base_stats && part.base_stats.armor) {
-				total += part.base_stats.armor;
-			}
-		}
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.armor || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.armor || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.armor || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.armor || 0;
 		return total;
 	}
 
 	calculateTotalSpeed() {
 		let total = 0;
-		for (const slot in this.gameState.equipped) {
-			const part = this.gameState.equipped[slot];
-			if (part && part.base_stats && part.base_stats.speed) {
-				total += part.base_stats.speed;
-			}
-		}
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.speed || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.speed || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.speed || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.speed || 0;
 		return total;
 	}
 
 	calculateTotalWeight() {
 		let total = 0;
-		for (const slot in this.gameState.equipped) {
-			const part = this.gameState.equipped[slot];
-			if (part && part.base_stats && part.base_stats.weight) {
-				total += part.base_stats.weight;
-			}
-		}
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.weight || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.weight || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.weight || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.weight || 0;
 		return total;
 	}
 
 	calculateTotalPower() {
 		let total = 0;
-		for (const slot in this.gameState.equipped) {
-			const part = this.gameState.equipped[slot];
-			if (part && part.base_stats && part.base_stats.power) {
-				total += part.base_stats.power;
-			}
-		}
+		const equipped = this.gameState.equipped;
+		if (equipped.head && equipped.head.base_stats) total += equipped.head.base_stats.power || 0;
+		if (equipped.torso && equipped.torso.base_stats) total += equipped.torso.base_stats.power || 0;
+		if (equipped.legs && equipped.legs.base_stats) total += equipped.legs.base_stats.power || 0;
+		if (equipped.core && equipped.core.base_stats) total += equipped.core.base_stats.power || 0;
 		return total.toFixed(1);
 	}
 }
@@ -667,6 +679,41 @@ class Game {
 			this.gameState.removePart(partId);
 			this.ui.renderMechInventory();
 		}
+	}
+
+	showLootboxMenu(event, idx) {
+		event.preventDefault();
+		
+		document.querySelectorAll(".context-menu").forEach(m => m.classList.remove("active"));
+
+		const menu = document.createElement("div");
+		menu.className = "context-menu active";
+		menu.style.position = "fixed";
+		menu.style.top = event.clientY + "px";
+		menu.style.left = event.clientX + "px";
+
+		menu.innerHTML = `
+			<div class="context-menu-item equip" onclick="game.openLootboxAtIndex(${idx}); document.querySelectorAll('.context-menu').forEach(m => m.classList.remove('active'));">Open</div>
+			<div class="context-menu-item salvage" onclick="game.deleteLootbox(${idx}); document.querySelectorAll('.context-menu').forEach(m => m.classList.remove('active'));">Delete</div>
+		`;
+
+		document.body.appendChild(menu);
+
+		setTimeout(() => {
+			document.addEventListener("click", () => {
+				menu.classList.remove("active");
+			}, { once: true });
+		}, 0);
+	}
+
+	openLootboxAtIndex(idx) {
+		this.gameState.currentScene = "lootbox";
+		this.ui.renderLootboxOpening();
+	}
+
+	deleteLootbox(idx) {
+		this.gameState.removeLootbox(idx);
+		this.ui.renderMechInventory();
 	}
 }
 
