@@ -66,24 +66,6 @@ const PARTS_DATA = {
 				{ id: "weapon_9", name: "Prismatic Beam", type: "weapon", class: "ranged", rarity: "prismatic", icon: "💎", base_stats: { speed: 1, size: 1, weight: 2, defense: 0, attack: 7, adv_defense: 2 }, moves: ["cascade_fire"] },
 			]
 		}
-	},
-				{ id: "core_8", name: "Prototype Singularity", type: "core", class: "support", rarity: "prototype", icon: "🌌", base_stats: { power: 35, efficiency: 1.3 } },
-				{ id: "core_9", name: "Prismatic Genesis", type: "core", class: "support", rarity: "prismatic", icon: "💎", base_stats: { power: 40, efficiency: 1.4 } },
-			]
-		},
-		weapons: {
-			parts: [
-				{ id: "weapon_1", name: "Scrap Gun", type: "weapon", class: "artillery", rarity: "homemade", icon: "🔫", base_stats: { damage: 8, ammo: 100 } },
-				{ id: "weapon_2", name: "Rifle Module", type: "weapon", class: "artillery", rarity: "uncommon", icon: "🎯", base_stats: { damage: 15, ammo: 120 } },
-				{ id: "weapon_3", name: "Plasma Cannon", type: "weapon", class: "artillery", rarity: "rare", icon: "⚡", base_stats: { damage: 25, ammo: 80 } },
-				{ id: "weapon_4", name: "Photon Beam", type: "weapon", class: "artillery", rarity: "ultra_rare", icon: "💫", base_stats: { damage: 35, ammo: 100 } },
-				{ id: "weapon_5", name: "Hyper Accelerator", type: "weapon", class: "artillery", rarity: "hyper", icon: "🚀", base_stats: { damage: 45, ammo: 120 } },
-				{ id: "weapon_6", name: "Cyber Blaster", type: "weapon", class: "artillery", rarity: "cyber", icon: "🌐", base_stats: { damage: 40, ammo: 110 } },
-				{ id: "weapon_7", name: "Alien Ray", type: "weapon", class: "artillery", rarity: "alien_ware", icon: "👾", base_stats: { damage: 48, ammo: 130 } },
-				{ id: "weapon_8", name: "Prototype Disruptor", type: "weapon", class: "artillery", rarity: "prototype", icon: "🔬", base_stats: { damage: 55, ammo: 90 } },
-				{ id: "weapon_9", name: "Prismatic Lance", type: "weapon", class: "artillery", rarity: "prismatic", icon: "💎", base_stats: { damage: 65, ammo: 140 } },
-			]
-		}
 	}
 };
 
@@ -100,89 +82,61 @@ const LOOTBOX_RATES = {
 	prismatic: 1
 };
 
-// Rarity colors
-const RARITY_COLORS = {
-	homemade: "#808080",
-	uncommon: "#00aa00",
-	rare: "#0066ff",
-	ultra_rare: "#8800ff",
-	hyper: "#ffd700",
-	cyber: "#00ffff",
-	alien_ware: "#ff00ff",
-	prototype: "#ff0000",
-	prismatic: "#ff69b4"
-};
-
-// Get all parts
+// Get all parts from data
 function getAllParts() {
 	const parts = [];
-	for (const collection in PARTS_DATA.collections) {
-		parts.push(...PARTS_DATA.collections[collection].parts);
+	for (const type in PARTS_DATA.collections) {
+		parts.push(...PARTS_DATA.collections[type].parts);
 	}
 	return parts;
 }
 
-// Get parts by type
-function getPartsByType(type) {
-	const parts = [];
-	for (const collection in PARTS_DATA.collections) {
-		const collectionParts = PARTS_DATA.collections[collection].parts.filter(p => p.type === type);
-		parts.push(...collectionParts);
-	}
-	return parts;
+// Get part by ID
+function getPartById(id) {
+	return getAllParts().find(p => p.id === id);
 }
 
-// Get random part by weighted rarity
-function getRandomPartByRarity() {
-	const allParts = getAllParts();
-	let totalWeight = 0;
-	for (const rarity in LOOTBOX_RATES) {
-		totalWeight += LOOTBOX_RATES[rarity];
-	}
-
-	let roll = Math.random() * totalWeight;
-	for (const rarity in LOOTBOX_RATES) {
-		roll -= LOOTBOX_RATES[rarity];
-		if (roll <= 0) {
-			const partsByRarity = allParts.filter(p => p.rarity === rarity);
-			return partsByRarity[Math.floor(Math.random() * partsByRarity.length)];
-		}
-	}
-	return allParts[Math.floor(Math.random() * allParts.length)];
-}
-
-// Price calculation
+// Calculate item price based on rarity
 function calculatePrice(part) {
-	const rarityMult = {
-		homemade: 1.0,
-		uncommon: 1.25,
-		rare: 1.5,
-		ultra_rare: 2.0,
-		hyper: 3.0,
-		cyber: 4.0,
-		alien_ware: 5.0,
-		prototype: 6.0,
-		prismatic: 10.0
+	const basePrices = {
+		homemade: 50,
+		uncommon: 100,
+		rare: 250,
+		ultra_rare: 500,
+		hyper: 1000,
+		cyber: 800,
+		alien_ware: 1200,
+		prototype: 1500,
+		prismatic: 2000
 	};
+	return basePrices[part.rarity] || 50;
+}
 
-	const classMult = {
-		heavy: 1.2,
-		agile: 1.1,
-		artillery: 1.3,
-		recon: 1.0,
-		support: 0.9
-	};
-
-	const rarity = part.rarity || "homemade";
-	const partClass = part.class || "recon";
-	let statTotal = 0;
-
-	if (part.base_stats) {
-		for (const stat in part.base_stats) {
-			statTotal += Math.abs(part.base_stats[stat]);
+// Get random part by rarity weight
+function getRandomPartByRarity() {
+	const rand = Math.random() * 100;
+	let cumulative = 0;
+	
+	for (const rarity in LOOTBOX_RATES) {
+		cumulative += LOOTBOX_RATES[rarity];
+		if (rand <= cumulative) {
+			const parts = getAllParts().filter(p => p.rarity === rarity);
+			return parts[Math.floor(Math.random() * parts.length)];
 		}
 	}
-
-	const price = Math.floor(rarityMult[rarity] * classMult[partClass] * Math.max(1, statTotal) * 10);
-	return Math.max(50, price);
+	
+	return getAllParts()[Math.floor(Math.random() * getAllParts().length)];
 }
+
+// Rarity colors for UI
+const RARITY_COLORS = {
+	homemade: "#888888",
+	uncommon: "#00ff00",
+	rare: "#0080ff",
+	ultra_rare: "#ff00ff",
+	hyper: "#ffff00",
+	cyber: "#00ffff",
+	alien_ware: "#ff6600",
+	prototype: "#ff0080",
+	prismatic: "#ff00ff"
+};
