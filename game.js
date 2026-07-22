@@ -165,6 +165,11 @@ class UIRenderer {
 			<div class="game-scene active">
 				<div class="top-bar">
 					<h2>Inventory</h2>
+					<div style="display: flex; gap: 10px; margin-left: auto;">
+						<button class="btn" onclick="game.startGame()">Inventory</button>
+						<button class="btn" onclick="game.goToShop()">Shop</button>
+						<button class="btn danger" onclick="game.backToMenu()">Main Menu</button>
+					</div>
 					<div class="money-display">Scraps: ${this.gameState.money}</div>
 				</div>
 
@@ -189,21 +194,17 @@ class UIRenderer {
 								<span class="stat-value">${this.calculateTotalPower()}</span>
 							</div>
 						</div>
-					</div>
 
-					<div class="center-panel">
-						<div class="mech-builder">
-							<h3>Mech Builder</h3>
-							<div class="slot-container">
-								${this.renderSlot("Head", "head", equipped.head)}
-								${this.renderSlot("Torso", "torso", equipped.torso)}
-								${this.renderSlot("Legs", "legs", equipped.legs)}
-								${this.renderSlot("Core", "core", equipped.core)}
-							</div>
+						<div class="stats-section">
+							<h3>Equipped Parts</h3>
+							${this.renderSlot("Head", "head", equipped.head)}
+							${this.renderSlot("Torso", "torso", equipped.torso)}
+							${this.renderSlot("Legs", "legs", equipped.legs)}
+							${this.renderSlot("Core", "core", equipped.core)}
 						</div>
 					</div>
 
-					<div class="right-panel">
+					<div class="right-panel" style="flex: 1;">
 						<div class="filter-tabs">
 							${this.renderFilterTabs()}
 						</div>
@@ -214,9 +215,7 @@ class UIRenderer {
 				</div>
 
 				<div class="bottom-bar">
-					<button class="btn" onclick="game.goToShop()">Shop</button>
-					<button class="btn" onclick="game.openLootboxes()">Lootboxes</button>
-					<button class="btn danger" onclick="game.backToMenu()">Back to Menu</button>
+					<button class="btn" onclick="game.openLootboxes()">Lootboxes (${this.gameState.lootboxes.length})</button>
 				</div>
 			</div>
 		`;
@@ -261,14 +260,18 @@ class UIRenderer {
 	}
 
 	renderInventoryGrid(filtered) {
-		return filtered.map(item => `
-			<div class="inventory-item rarity-${item.rarity}" oncontextmenu="game.showContextMenu(event, '${item.id}')">
-				<div style="font-size: 28px; line-height: 1;">${item.icon}</div>
-				<div class="item-name">${item.name}</div>
-				<div class="item-type">${item.type}</div>
-				<div class="item-rarity">x${item.count}</div>
-			</div>
-		`).join("");
+		return filtered.map(item => {
+			const salvageValue = Math.floor(calculatePrice(item) * 0.5);
+			return `
+				<div class="inventory-item rarity-${item.rarity}" oncontextmenu="game.showContextMenu(event, '${item.id}')" title="Click to equip or right-click for options. Salvage: ${salvageValue} scraps">
+					<div style="font-size: 24px; line-height: 1; margin-bottom: 2px;">${item.icon}</div>
+					<div class="item-name">${item.name}</div>
+					<div class="item-type">${item.type}</div>
+					<div class="item-count">x${item.count}</div>
+					<div class="item-salvage">💰 ${salvageValue}</div>
+				</div>
+			`;
+		}).join("");
 	}
 
 	renderShop() {
@@ -276,6 +279,11 @@ class UIRenderer {
 			<div class="game-scene active">
 				<div class="top-bar">
 					<h2>Shop</h2>
+					<div style="display: flex; gap: 10px; margin-left: auto;">
+						<button class="btn" onclick="game.startGame()">Inventory</button>
+						<button class="btn" onclick="game.goToShop()">Shop</button>
+						<button class="btn danger" onclick="game.backToMenu()">Main Menu</button>
+					</div>
 					<div class="money-display">Scraps: ${this.gameState.money}</div>
 				</div>
 
@@ -300,8 +308,6 @@ class UIRenderer {
 				</div>
 
 				<div class="bottom-bar">
-					<button class="btn" onclick="game.refreshShop()">Refresh Shop</button>
-					<button class="btn danger" onclick="game.backToMenu()">Back</button>
 				</div>
 			</div>
 		`;
